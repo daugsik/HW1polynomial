@@ -73,7 +73,29 @@ Polynomial Polynomial::operator-(const Polynomial& p) const
 // Boolean comparison operators
 bool Polynomial::operator==(const Polynomial& p) const
 {
+	//
+	Term *a = NULL;
+	Term *b = NULL;
+	bool isEqual = true;
 
+	a = head->next;
+	b = p.head->next;
+
+	// special case: if terms are similar but one has
+	// more terms, run comparison of term as it will
+	// compare against the head and isEqual will become false.
+
+	while ((a != head || b != p.head) && isEqual)
+	{
+		// calls helper to see if terms are equal
+		isEqual = termEquality(*a, *b);
+		a = a->next;
+		b = b->next;
+	}
+
+	a = NULL; // safety null assignments
+	b = NULL;
+	return isEqual; 
 }
 
 // Performs a check on two terms from different Polynomials
@@ -96,14 +118,15 @@ Polynomial& Polynomial::operator=(const Polynomial& p)
 
 Polynomial& Polynomial::operator+=(const Polynomial& p)
 {
-
+	return (*this + p);
 }
 
 Polynomial& Polynomial::operator-=(const Polynomial& p)
 {
-
+	return (*this - p);
 }
 
+// Assumes that there are no terms with identical powers.
 bool Polynomial::insert(Term* prev, const double newCoefficient, const int power)
 {
 	Term *toInsert = new Term; // create new node to insert
@@ -118,6 +141,7 @@ bool Polynomial::insert(Term* prev, const double newCoefficient, const int power
 	size++; // increment size
 }
 
+// Assumes this is not the dummy header term.
 bool Polynomial::remove(Term* pos)
 {
 	pos->next->prev = pos->prev; // next term's prev = pos.prev
