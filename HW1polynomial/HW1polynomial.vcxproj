@@ -110,6 +110,11 @@
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="polynomial.cpp" />
+    <ClCompile Include="polynomialDriver.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="polynomial.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
