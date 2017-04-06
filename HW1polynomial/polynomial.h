@@ -43,8 +43,14 @@ private:
 
 	bool insert(Term* prev, const double newCoefficient, const int power);
 	bool remove(Term* pos);
-	void ostreamHelper() const;
+
+	// Added Helper Functions
+	string print() const;
+	string printHelper(const Term& toPrint) const;
 	bool termEquality(const Term& a, const Term& b) const;
+	void clearTerms();
+	void copyTerms(const Polynomial& p);
+	bool findPower(Term& toUpdate, const int power) const;
 };
 
 
