@@ -17,6 +17,7 @@ public:
 	// returns the coefficient of the x^power term.
 	bool changeCoefficient(const double newCoefficient, const int power);
 	// replaces the coefficient of the x^power term
+	int getSize() const;
 
 	// Arithmetic operators
 	Polynomial operator+(const Polynomial& p) const;
