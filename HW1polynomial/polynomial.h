@@ -41,7 +41,7 @@ private:
 	Term *head;       // a pointer to the doubly-linked circular list of
 					  // sparce polynomial
 
-	bool insert(Term* prev, const double newCoefficient, const int power);
+	bool insert(Term* next, const double newCoefficient, const int power);
 	bool remove(Term* pos);
 
 	// Added Helper Functions
@@ -51,6 +51,7 @@ private:
 	void clearTerms();
 	void copyTerms(const Polynomial& p);
 	bool findPower(Term& toUpdate, const int power) const;
+	void normalize(); // removes empty nodes that are not the head
 };
 
 
