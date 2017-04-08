@@ -23,10 +23,11 @@ int main()
 
 
 	// Manual insertions
-	for (int i = 1; i < TEST_SIZE; i++)
+	for (int i = 0; i < TEST_SIZE; i++)
 	{
+		double j = double(i) / 2;
 		a.changeCoefficient(i, TEST_SIZE - i);
-		b.changeCoefficient(i*2, i);
+		b.changeCoefficient(j, i);
 	}
 
 	cout << "Term Insertion" << endl;
@@ -36,20 +37,26 @@ int main()
 
 
 	// Change Coefficients
-	for (int i = 1; i < TEST_SIZE; i++)
+	// Switches polynomials a and b term by term
+	for (int i = 0; i < TEST_SIZE; i++)
 	{
-		a.changeCoefficient(i*2, i);
-		driverPrint("a", a);
+		double j = double(i) / 2;
+		a.changeCoefficient(j, i);
 		b.changeCoefficient(i, TEST_SIZE - i);
-		driverPrint("b", b);
 	}
+
+	a.changeCoefficient(5, 0);
+	b.changeCoefficient(100, 0);
 
 	cout << "Term Change" << endl;
 	driverPrint("a", a);
 	driverPrint("b", b);
-
+	cout << "--" << endl;
 
 	// Manual Deletions
+	a.changeCoefficient(0, 1);
+	b.changeCoefficient(0, 2);
+
 	a.changeCoefficient(0, 1);
 	b.changeCoefficient(0, 2);
 
@@ -60,6 +67,7 @@ int main()
 
 
 	// Copy test
+	cout << "Copy Test" << endl;
 	Polynomial c = a;
 	Polynomial d = a;
 
@@ -73,6 +81,7 @@ int main()
 	
 	
 	// Polynomial Logic
+	cout << "Polynomial Logic" << endl;
 	cout << boolalpha;
 
 	bool tempValue = a == b;	// false
@@ -98,20 +107,31 @@ int main()
 	driverPrint("a", a);
 	driverPrint("b", b);
 	driverPrint("c", c);
+
 	d = b - a;
 	cout << "d = b - a" << endl;
 	driverPrint("d", d);
+
 	c += c;
 	cout << "c += c" << endl;
 	driverPrint("c", c);
-	d -= d;
-	cout << "d -= d" << endl;
+
+	c -= d;
+	cout << "c -= d" << endl;
 	driverPrint("d", d);
+
+	c -= c;
+	cout << "c -= c" << endl;
+	driverPrint("c", c);
+
+	c += d;
+	cout << "c += d" << endl;
+	driverPrint("c", c);
 
 	return 0;
 }
 
 void driverPrint(const string& name, const Polynomial& toPrint)
 {
-	cout << name << "(" << toPrint.getSize() << "): " << toPrint << endl;
+	cout << "\t" << name << "(" << toPrint.getSize() << "): " << toPrint << endl;
 }

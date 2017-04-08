@@ -74,7 +74,11 @@ string Polynomial::printHelper(const Term& toPrint) const
 	// x is equal to 0.
 	if (toPrint.coeff != 1 || toPrint.power == 0)
 	{
-		toReturn += to_string(abs(toPrint.coeff));
+		string temp = "";
+		stringstream stream;
+		stream << fixed << setprecision(1) << abs(toPrint.coeff);
+		temp = stream.str();
+		toReturn += temp;
 	};
 	
 	// If the power of x is anything other than 0, concatenate x
@@ -109,6 +113,14 @@ Polynomial::Polynomial()
 
 Polynomial::Polynomial(const Polynomial& p)
 {
+	Term *temp = new Term;
+	temp->coeff = 0;
+	temp->power = 0;
+	temp->next = temp;
+	temp->prev = temp;
+	head = temp;
+	temp = NULL;
+	size = 0;
 	copyTerms(p);
 	size = p.size; // copy size
 };
@@ -168,8 +180,8 @@ bool Polynomial::changeCoefficient(const double newCoefficient, const int power)
 {
 	Term *index = head->next;
 
-	// if the list is empty, just add new term.
-	if (index == head)
+	// if the list is empty, just add new term, unless term is 0.
+	if (index == head && newCoefficient != 0)
 	{
 		return insert(index, newCoefficient, power);
 	}
@@ -192,8 +204,9 @@ bool Polynomial::changeCoefficient(const double newCoefficient, const int power)
 		}
 
 		// if the current term has a power < the one being sought
-		// then the term does not currently exist. Perform an insertion.
-		if (index->power < power)
+		// then the term does not currently exist. Perform an insertion
+		// IF the coefficient is not 0 (i.e. a removal)
+		if (index->power < power && newCoefficient != 0)
 		{
 			return insert(index, newCoefficient, power);
 		}
@@ -202,7 +215,7 @@ bool Polynomial::changeCoefficient(const double newCoefficient, const int power)
 
 	// if the program reaches the end of the list, use the dummy header as
 	// 'next' and perform the insertion.
-	if (index == head)
+	if (index == head && newCoefficient != 0)
 	{
 		return insert(index, newCoefficient, power);
 	}
@@ -239,14 +252,17 @@ Polynomial Polynomial::operator+(const Polynomial& p) const
 	// while p still contains unvisited terms
 	while (pIndex != p.head)
 	{
+
 		//if equivalent powers are found, change coefficient to reflect addition
 		if (pIndex->power == index->power)
 		{
-			toReturn->changeCoefficient((pIndex->coeff + index->coeff), pIndex->power);
+			//moves forward to avoid a deletion
+			index = index->next;
+			toReturn->changeCoefficient((pIndex->coeff + index->prev->coeff), pIndex->power);
 
 			// increment both indices
 			pIndex = pIndex->next;
-			index = index->next;
+
 		}
 
 		/*
@@ -254,7 +270,7 @@ Polynomial Polynomial::operator+(const Polynomial& p) const
 			Alternatively, if index has reached the end of its list of terms, append
 			terms to the end of the list by using the dummy header as "next"
 		*/
-		if (pIndex->power > index->power || index == toReturn->head)
+		else if (pIndex->power > index->power || index == toReturn->head)
 		{
 			toReturn->insert(index, pIndex->coeff, pIndex->power);
 
@@ -266,14 +282,13 @@ Polynomial Polynomial::operator+(const Polynomial& p) const
 			if to be added term has power < index power, perform no additions or changes.
 			If the index is pointing to the dummy header, do not increment index.
 		*/
-		if (pIndex->power < index->power && index != toReturn->head)
+		else if (pIndex->power < index->power && index != toReturn->head)
 		{
 			// increment only the index
 			index = index->next;
 		}
 	}
 
-	toReturn->normalize();
 	return *toReturn;
 }
 
@@ -304,25 +319,25 @@ Polynomial Polynomial::operator-(const Polynomial& p) const
 	// while p still contains unvisited terms
 	while (pIndex != p.head)
 	{
-		//if equivalent powers are found, change coefficient to reflect subtraction
-		// note that p is the value that is negated.
+
+		//if equivalent powers are found, change coefficient to reflect addition
 		if (pIndex->power == index->power)
 		{
-			toReturn->changeCoefficient((index->coeff - pIndex->coeff), pIndex->power);
+			//moves forward to avoid a deletion
+			index = index->next;
+			toReturn->changeCoefficient((index->prev->coeff - pIndex->coeff), pIndex->power);
 
 			// increment both indices
 			pIndex = pIndex->next;
-			index = index->next;
+
 		}
 
 		/*
-			if to be added term has greater power than current index, insert before.
-			Alternatively, if index has reached the end of its list of terms, append
-			terms to the end of the list by using the dummy header as "next"
-
-			coefficient is negated prior to passing into insert.
+		if to be added term has greater power than current index, insert before.
+		Alternatively, if index has reached the end of its list of terms, append
+		terms to the end of the list by using the dummy header as "next"
 		*/
-		if (pIndex->power > index->power || index == toReturn->head)
+		else if (pIndex->power > index->power || index == toReturn->head)
 		{
 			toReturn->insert(index, -(pIndex->coeff), pIndex->power);
 
@@ -334,37 +349,14 @@ Polynomial Polynomial::operator-(const Polynomial& p) const
 		if to be added term has power < index power, perform no additions or changes.
 		If the index is pointing to the dummy header, do not increment index.
 		*/
-		if (pIndex->power < index->power && index != toReturn->head)
+		else if (pIndex->power < index->power && index != toReturn->head)
 		{
 			// increment only the index
 			index = index->next;
 		}
 	}
 
-	toReturn->normalize();
 	return *toReturn;
-}
-
-/*
-	Is called after performing polynomial arithmetic. Iterates through
-	the list and removes all 0 coefficient terms.
-*/
-void Polynomial::normalize()
-{
-	Term *index = head->next;
-
-	while (index != head)
-	{
-		if (index->coeff == 0)
-		{
-			remove(index);	// index is incremented in remove function
-		}
-		
-		else
-		{
-			index = index->next;
-		}
-	}
 }
 
 // Boolean comparison operators
@@ -441,12 +433,20 @@ void Polynomial::copyTerms(const Polynomial& p)
 	Term *pIndex = p.head->next;
 	Term *index = head;
 
+	// if to-copy polynomial is empty, return.
+	if (pIndex == p.head)
+	{
+		return;
+	}
+
+
 	// while pindex is not pointing to the to-copy list's head
 	// continue copying terms into new Polynomial
+	// Because of how insertion works, index stays constant
 	while (pIndex != p.head)
 	{
 		insert(index, pIndex->coeff, pIndex->power);
-		index = index->next;
+		pIndex = pIndex->next;
 	}
 
 	index = NULL; // safety null assignment
@@ -459,8 +459,12 @@ void Polynomial::copyTerms(const Polynomial& p)
  */
 void Polynomial::clearTerms()
 {
-	Term *index = NULL;
-	index = head->next; // moves to next node.
+	Term *index = head->next;
+
+	if (index == head)
+	{
+		return;
+	}
 
 	// if the polynomial is empty, just jump to deleting dummy header
 	// else, iterate through list, removing one at a time.
@@ -474,12 +478,18 @@ void Polynomial::clearTerms()
 
 Polynomial& Polynomial::operator+=(const Polynomial& p)
 {
-	return (*this + p);
+	Polynomial *temp = new Polynomial;
+	*temp = *this + p;
+	*this = *temp;
+	return (*this);
 }
 
 Polynomial& Polynomial::operator-=(const Polynomial& p)
 {
-	return (*this - p);
+	Polynomial *temp = new Polynomial;
+	*temp = *this - p;
+	*this = *temp;
+	return (*this);
 }
 
 /*
@@ -526,8 +536,6 @@ bool Polynomial::remove(Term* pos)
 	{
 		return false;
 	}
-	
-	Term *temp = pos->next;
 
 	pos->next->prev = pos->prev; // next term's prev = pos.prev
 	pos->prev->next = pos->next; // prev term's next = pos.next
@@ -536,9 +544,6 @@ bool Polynomial::remove(Term* pos)
 	pos->prev = NULL;
 
 	delete pos; // deallocate memory
-
-	pos = temp; // moves pos to next node.
-	temp = NULL;
 
 	size--;	// decrement size
 

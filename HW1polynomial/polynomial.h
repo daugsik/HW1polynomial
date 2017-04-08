@@ -1,5 +1,7 @@
 // A Polynomial class                                  
 #include <iostream>
+#include <iomanip>
+#include <sstream>
 #include <string>
 using namespace std;
 
