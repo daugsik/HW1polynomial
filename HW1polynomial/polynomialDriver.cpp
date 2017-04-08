@@ -1,11 +1,16 @@
-/*
-	CSS 343 Spring 2017
-	4/7/2017
-	Dongkyu Daniel Kim
+/* -------------------polynomialDriver.cpp-------------------------
+Dongkyu Daniel Kim, CSS343A, ##
+Creation: April 5th, 2017
+Last Accessed: April 7th, 2017
 
-	Driver for polynomial.cpp
+----------------------------------------------------------
+Purpose:
+	This driver tests the functionality of the polynomial class.
+	No special features have been used. However, I have assumed
+	that the use of double means that displaying at least one
+	decimal place would be a good idea.
 
-*/
+---------------------------------------------------------------*/
 #include "polynomial.h"
 #define TEST_SIZE 5
 
@@ -128,9 +133,28 @@ int main()
 	cout << "c += d" << endl;
 	driverPrint("c", c);
 
+	cout << "Polynomial a stats:" << endl;
+	cout << "\tDegree: " << a.degree() << endl;
+	cout << "\tCoeff of power 3: " << a.coefficient(3) << endl;
+
+	cout << "Polynomial b stats:" << endl;
+	cout << "\tDegree: " << b.degree() << endl;
+	cout << "\tCoeff of power 3: " << b.coefficient(3) << endl;
+
 	return 0;
 }
 
+
+/*-------------------- driverPrint --------------------------
+driverPrint: prints out the name(size) of the polynomial
+along with its string formatted output. For neatness.
+
+preconditions:
+	is given the name that corresponds to the polynomial
+	to be printed.
+postconditions:
+	outputs a labeled polynomial string.
+--------------------------------------------------------------*/
 void driverPrint(const string& name, const Polynomial& toPrint)
 {
 	cout << "\t" << name << "(" << toPrint.getSize() << "): " << toPrint << endl;

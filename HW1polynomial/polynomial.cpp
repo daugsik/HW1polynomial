@@ -1,21 +1,49 @@
+/* -------------------polynomial.cpp-------------------------
+	Dongkyu Daniel Kim, CSS343A, ##
+	Creation: April 5th, 2017
+	Last Accessed: April 7th, 2017
+
+	----------------------------------------------------------
+	Purpose:
+		This file implements the class functions of the Polynomial
+		object. It supports copying, addition, subtraction,
+		equality, !equality operations, print functionality
+		and individual term editing.
+
+---------------------------------------------------------------*/
 #include "polynomial.h"
 
+// PRINT FUNCTIONS
 
-// Overloaded <<: prints Cn * x^n + Cn-1 * X^n-1 + ... C1 * X + C0
+/*------------------------- << operator --------------------------
+
+	<<:	Produces a console output when the object is fed into an
+		ostream operator.
+
+	preconditions:
+		p is the polynomial to print out to console.
+	postconditions:
+		A string value is fed into output and a valid representation
+		of the polynomial object is printed on screen.
+--------------------------------------------------------------*/
 ostream& operator<<(ostream &output, const Polynomial& p)
 {
 	output << p.print();
 	return output;
 }
 
-/*
-	Produces the string representation of the polynomial to be passed to
-	output.
+/*------------------------- print --------------------------
+	
+	print: Produces the string representation of the polynomial 
+	to be passed to	output. Assumes that, because of the double
+	data type used, decimals are desirable.
 
-	Performs most of the print logic. Delegates the printing of individual
-	terms to printHelper. Handles the printing of spaces between the terms
-	and the printing of individual term signs.
-*/
+	preconditions: 
+		None
+	postconditions: 
+		A string value representing the equation form of the
+		polynomial is produced and returned.
+--------------------------------------------------------------*/	
 string Polynomial::print() const
 {
 	string toReturn = "";
@@ -62,11 +90,19 @@ string Polynomial::print() const
 	return toReturn;
 }
 
-/*
-	returns a single string in the form "Cx^k" with no spaces.
-	If the coefficient is negative, drops the negative, as print()
-	handles expressing negativity.
-*/
+
+/*-------------------- printHelper --------------------------
+	printHelper: returns a single string in the form "Cx^k" with 
+	no spaces. If the coefficient is negative, drops the negative, 
+	as print() handles expressing negativity.
+
+	preconditions:
+		toPrint is the term to be converted into a string. toPrint
+		has valid values for both coeff and power.
+	postconditions:
+		returns an "absolute value" of the term expressed in
+		Cx^k form, where ^k is omitted if k == 1. 
+--------------------------------------------------------------*/
 string Polynomial::printHelper(const Term& toPrint) const
 {
 	string toReturn = "";
@@ -97,8 +133,21 @@ string Polynomial::printHelper(const Term& toPrint) const
 	return toReturn;
 };
 
-// Constructor: the default is a 0-degree polynomial with 0.0 coefficient
-// Member functions
+
+//#######################################################################
+
+
+
+/*-------------------- Constructor --------------------------
+	Constructor: Creates an empty polynomial of size 0
+		that only contains the dummy header node that points
+		to itself.
+
+	preconditions:
+		None.
+	postconditions:
+		See Description.
+--------------------------------------------------------------*/
 Polynomial::Polynomial()
 {
 	Term *temp = new Term;
@@ -110,6 +159,17 @@ Polynomial::Polynomial()
 	temp = NULL;
 	size = 0;
 };
+
+/*-------------------- Copy Constructor --------------------------
+	Copy: Creates an identical object to an already existing one
+		and possesses pointers to its own set of Terms
+
+	preconditions:
+		p exists and has copiable values.
+	postconditions:
+		p is unchanged and this polynomial has its own set
+		of terms of identical value to those in p's set.
+--------------------------------------------------------------*/
 
 Polynomial::Polynomial(const Polynomial& p)
 {
@@ -125,6 +185,15 @@ Polynomial::Polynomial(const Polynomial& p)
 	size = p.size; // copy size
 };
 
+/*-------------------- Destructor --------------------------
+	Destructor: Deallocates all terms in the list and the dummy
+		header before deallocating itself.
+
+	preconditions:
+		None
+	postconditions:
+		Complete deallocation of memory prior to object deletion.
+--------------------------------------------------------------*/
 Polynomial::~Polynomial()
 {
 	// clear all nonhead terms.
@@ -134,18 +203,34 @@ Polynomial::~Polynomial()
 	head = NULL;
 };
 
-/*
-	Finds the largest power of the polynomial.
-*/
+/*-------------------- degree --------------------------
+	degree: Finds and returns the largest power of X in the
+		polynomial
+
+	preconditions:
+		A sorted, descending list of terms.
+	postconditions:
+		Retrieval of the power currently residing in the "next"
+		Term.
+--------------------------------------------------------------*/
+
 int Polynomial::degree() const
 {
 	return(head->next->power);
 }
 
-/*
-	Searches for a specific power in the list. If it cannot
-	find the power, it returns 0.
-*/
+
+/*-------------------- coefficient --------------------------
+	coefficient: Searches for a specific power in the list. 
+	If it cannot find the power, it returns 0.
+
+	preconditions:
+		A specific power is given to search for in the list.
+	postconditions:
+		If there is a term with the given power, returns the
+		coefficient of that term. If it does not exist,
+		returns 0.
+--------------------------------------------------------------*/
 double Polynomial::coefficient(const int power) const
 {
 	Term *index = head->next;
@@ -171,11 +256,26 @@ double Polynomial::coefficient(const int power) const
 	return 0;
 }
 
-/*
-	Replaces or inserts a new term for a given power. If the power does not exist,
-	creates a new term and inserts appropriately. If power DOES exist, creates new
+
+/*-------------------- changeCoefficient --------------------------
+	changeCoefficient: 	Replaces or inserts a new term for a given power. 
+	If the power does not exist, creates a new term and inserts 
+	appropriately. If power DOES exist, creates new
 	term, deletes existing term, and inserts new in its place.
-*/
+
+	preconditions:
+		Is passed a power to search for and a coefficient to write to.
+	postconditions:
+			If the power does not exist, an insertion occurs where the
+		power would be and returns true.
+			If the power exists and newCoefficient != 0, it removes
+		the current term and inserts a new term in its place.
+		Returns true.
+			If the power exists and newCoefficient == 0, it removes
+		the current term. Returns true.
+			If all of the above does not happen, returns false.
+--------------------------------------------------------------*/
+
 bool Polynomial::changeCoefficient(const double newCoefficient, const int power)
 {
 	Term *index = head->next;
@@ -226,27 +326,31 @@ bool Polynomial::changeCoefficient(const double newCoefficient, const int power)
 
 // Arithmetic operators
 
-/*
-	Adds two polynomials together. Treats the calling Polynomial as the data struct
-	and the argument polynomial as a queue. Assumes that there exists negative powers.
-	A new polynomial is allocated and its functions are run to perform the arithmetic.
+/*-------------------- + Operator --------------------------
+	+: Adds two polynomials together.
 
-	If powers are equal, calls the newly allocated polynomial's changeCoefficient, where 
-	the newCoefficient argument is the SUM of the two terms' coefficients.
-
-	If the "data" polynomial's term power is less than the "queue's" term power, the data 
-	index is iterated to a term with lower power.
-
-	If the data polynomial's term power is greater than the queue's term power, the queue
-	term is added to the newly allocated polynomial, and the queue index is incremented.
-*/
+	preconditions:
+		p is a valid, sorted polynomial.
+	postconditions:
+			If powers are equal, calls the newly allocated 
+		polynomial's changeCoefficient, where the 
+		newCoefficient argument is the SUM of the 
+		two terms' coefficients. 
+			If the "data" polynomial's 
+		term power is less than the "queue's" term power, the data 
+		index is iterated to a term with lower power.
+			If the data polynomial's term power is greater 
+		than the queue's term power, the queue term is added 
+		to the newly allocated polynomial, and the queue 
+		index is incremented.
+--------------------------------------------------------------*/
 Polynomial Polynomial::operator+(const Polynomial& p) const
 {
 	// creates a copy of "this" polynomial to perform operations on
-	Polynomial *toReturn = new Polynomial(*this);
+	Polynomial toReturn = *this;
 
 	// intialize both indices to first term (if any)
-	Term *index = toReturn->head->next;
+	Term *index = toReturn.head->next;
 	Term *pIndex = p.head->next;
 
 	// while p still contains unvisited terms
@@ -258,7 +362,7 @@ Polynomial Polynomial::operator+(const Polynomial& p) const
 		{
 			//moves forward to avoid a deletion
 			index = index->next;
-			toReturn->changeCoefficient((pIndex->coeff + index->prev->coeff), pIndex->power);
+			toReturn.changeCoefficient((pIndex->coeff + index->prev->coeff), pIndex->power);
 
 			// increment both indices
 			pIndex = pIndex->next;
@@ -270,9 +374,9 @@ Polynomial Polynomial::operator+(const Polynomial& p) const
 			Alternatively, if index has reached the end of its list of terms, append
 			terms to the end of the list by using the dummy header as "next"
 		*/
-		else if (pIndex->power > index->power || index == toReturn->head)
+		else if (pIndex->power > index->power || index == toReturn.head)
 		{
-			toReturn->insert(index, pIndex->coeff, pIndex->power);
+			toReturn.insert(index, pIndex->coeff, pIndex->power);
 
 			//only increment pIndex in case of more > powers
 			pIndex = pIndex->next;
@@ -282,38 +386,45 @@ Polynomial Polynomial::operator+(const Polynomial& p) const
 			if to be added term has power < index power, perform no additions or changes.
 			If the index is pointing to the dummy header, do not increment index.
 		*/
-		else if (pIndex->power < index->power && index != toReturn->head)
+		else if (pIndex->power < index->power && index != toReturn.head)
 		{
 			// increment only the index
 			index = index->next;
 		}
 	}
 
-	return *toReturn;
+	index = NULL;
+	pIndex = NULL;
+
+	return toReturn;
 }
 
-/*
-	Adds two polynomials together. Treats the calling Polynomial as the data struct
-	and the argument polynomial as a queue. Assumes that there exists negative powers.
-	A new polynomial is allocated and its functions are run to perform the arithmetic.
 
-	If powers are equal, calls the newly allocated polynomial's changeCoefficient, where
-	the newCoefficient argument is the DIFFERENCE of the two terms' coefficients.
+/*-------------------- - Operator --------------------------
+	-: Adds two polynomials together.
 
-	If the "data" polynomial's term power is less than the "queue's" term power, the data
-	index is iterated to a term with lower power.
-
-	If the data polynomial's term power is greater than the queue's term power, the queue
-	term is added WITH A NEGATED INDEX to the newly allocated polynomial, and the queue 
-	index is incremented.
-*/
+	preconditions:
+		p is a valid, sorted polynomial.
+	postconditions:
+			If powers are equal, calls the newly allocated 
+		polynomial's changeCoefficient, where the 
+		newCoefficient argument is the DIFFERENCE of the 
+		two terms' coefficients. 
+			If the "data" polynomial's 
+		term power is less than the "queue's" term power, the data 
+		index is iterated to a term with lower power.
+			If the data polynomial's term power is greater 
+		than the queue's term power, the queue term is added 
+		WITH A NEGATED COEFFICIENT to the newly allocated 
+		polynomial, and the queue index is incremented.
+--------------------------------------------------------------*/
 Polynomial Polynomial::operator-(const Polynomial& p) const
 {
 	// creates a copy of "this" polynomial to perform operations on
-	Polynomial *toReturn = new Polynomial(*this);
+	Polynomial toReturn = *this;
 
 	// intialize both indices to first term (if any)
-	Term *index = toReturn->head->next;
+	Term *index = toReturn.head->next;
 	Term *pIndex = p.head->next;
 
 	// while p still contains unvisited terms
@@ -325,7 +436,7 @@ Polynomial Polynomial::operator-(const Polynomial& p) const
 		{
 			//moves forward to avoid a deletion
 			index = index->next;
-			toReturn->changeCoefficient((index->prev->coeff - pIndex->coeff), pIndex->power);
+			toReturn.changeCoefficient((index->prev->coeff - pIndex->coeff), pIndex->power);
 
 			// increment both indices
 			pIndex = pIndex->next;
@@ -337,9 +448,9 @@ Polynomial Polynomial::operator-(const Polynomial& p) const
 		Alternatively, if index has reached the end of its list of terms, append
 		terms to the end of the list by using the dummy header as "next"
 		*/
-		else if (pIndex->power > index->power || index == toReturn->head)
+		else if (pIndex->power > index->power || index == toReturn.head)
 		{
-			toReturn->insert(index, -(pIndex->coeff), pIndex->power);
+			toReturn.insert(index, -(pIndex->coeff), pIndex->power);
 
 			//only increment pIndex in case of more > powers
 			pIndex = pIndex->next;
@@ -349,24 +460,30 @@ Polynomial Polynomial::operator-(const Polynomial& p) const
 		if to be added term has power < index power, perform no additions or changes.
 		If the index is pointing to the dummy header, do not increment index.
 		*/
-		else if (pIndex->power < index->power && index != toReturn->head)
+		else if (pIndex->power < index->power && index != toReturn.head)
 		{
 			// increment only the index
 			index = index->next;
 		}
 	}
 
-	return *toReturn;
+	return toReturn;
 }
+
+
 
 // Boolean comparison operators
 
-/*
-	Moves stepwise through both this and p polynomials. Checks only
-	equality of coefficients and powers in each term with termEquality.
-	At the first sign of difference, returns false. Once both pointers
-	return to the head, returns true.
-*/
+/*-------------------- == Operator --------------------------
+	==: Moves stepwise through both this and p polynomials
+	and compares terms one by one. Returns false upon any
+	discrepancy.
+
+	preconditions:
+		p is a valid polynomial
+	postconditions:
+		returns true if p and this are identical, else false.
+--------------------------------------------------------------*/
 bool Polynomial::operator==(const Polynomial& p) const
 {
 	//
@@ -394,37 +511,67 @@ bool Polynomial::operator==(const Polynomial& p) const
 	return isEqual; 
 }
 
-// Performs a check on two terms from different Polynomials
+/*-------------------- termEquality --------------------------
+	termEquality: Compares the coefficient and powers between
+	two given terms.
+
+	preconditions:
+		a and b are valid Term structs.
+	postconditions:
+		returns true if both coefficients and powers are equal.
+--------------------------------------------------------------*/
 bool Polynomial::termEquality(const Term& a, const Term& b) const
 {
 	return (a.coeff == b.coeff && a.power == b.power);
 }
 
-/*
-	Inverts == result.
-*/
+/*-------------------- != Operator --------------------------
+	!=: provides the inverse of ==
+
+	preconditions:
+		p is a valid polynomial
+	postconditions:
+		returns the inverted value of ==.
+--------------------------------------------------------------*/
 bool Polynomial::operator!=(const Polynomial& p) const
 {
 	// performs equality check and inverts result
 	return !(*this == p);
 }
 
-// Assignment operators
 
-/*
-	Clears out currently held terms and updates list with terms in p
-*/
+
+
+// Assignment operator
+
+/*-------------------- = Operator --------------------------
+	Assignment Operator: Copies values from p into the currently
+		existing Polynomial.
+
+	preconditions:
+		p is a valid polynomial.
+	postconditions:
+		this polynomial has been allocated a new list of terms
+		that are identical to those found in p.
+--------------------------------------------------------------*/
 Polynomial& Polynomial::operator=(const Polynomial& p)
 {
 	this->copyTerms(p);
 	return *this;
 }
 
-/*
-	Creates newly allocated terms from reference Polynomial p.
+/*-------------------- copyTerms --------------------------
+	copyTerms: 	Creates newly allocated terms from reference Polynomial p.
 	Used in copy constructor and assignment operator. First
 	clears any existing terms and copies in new terms.
-*/
+
+	preconditions:
+		p is a valid polynomial.
+	postconditions:
+		this polynomial's terms (outside of the dummy header)
+		have been deallocated, and the size of the polynomial
+		has been set to 0.
+--------------------------------------------------------------*/
 void Polynomial::copyTerms(const Polynomial& p)
 {
 	clearTerms();
@@ -453,10 +600,15 @@ void Polynomial::copyTerms(const Polynomial& p)
 	pIndex = NULL;
 }
 
-/* 
-	Helper for Assignment Operator: cleans out all Terms
+ /*-------------------- clearTerms --------------------------
+	clearTerms: Helper for Assignment Operator: cleans out all Terms
 	and copies polynomial passed in. Also used in destructor.
- */
+
+	 preconditions:
+		None
+	 postconditions:
+		All terms except the dummy header term have been deallocated.
+ --------------------------------------------------------------*/
 void Polynomial::clearTerms()
 {
 	Term *index = head->next;
@@ -477,8 +629,20 @@ void Polynomial::clearTerms()
 	index = NULL;
 }
 
+/*-------------------- += Operator --------------------------
+	+=: Adds p to this polynomial.
+
+	preconditions:
+		p is a valid polynomial.
+	postconditions:
+		Returns an updated version of itself after performing a
+		+ operation.
+--------------------------------------------------------------*/
 Polynomial& Polynomial::operator+=(const Polynomial& p)
 {
+	// Because *this + p does not seem to work, create a new
+	// polynomial and copy the values into this. Delete
+	// the new Polynomial after it is used.
 	Polynomial *temp = new Polynomial;
 	*temp = *this + p;
 	*this = *temp;
@@ -487,8 +651,21 @@ Polynomial& Polynomial::operator+=(const Polynomial& p)
 	return (*this);
 }
 
+/*-------------------- -= Operator --------------------------
+	-=: subtracts p from this polynomial.
+
+	preconditions:
+		p is a valid polynomial and p is value to be subtracted
+		from this polynomial.
+	postconditions:
+		Returns an updated version of itself after performing a
+		- operation.
+--------------------------------------------------------------*/
 Polynomial& Polynomial::operator-=(const Polynomial& p)
 {
+	// Because *this + p does not seem to work, create a new
+	// polynomial and copy the values into this. Delete
+	// the new Polynomial after it is used.
 	Polynomial *temp = new Polynomial;
 	*temp = *this - p;
 	*this = *temp;
@@ -504,6 +681,20 @@ Polynomial& Polynomial::operator-=(const Polynomial& p)
 
 	Returns false if a term with that power already exists (does not change existing term).
 */
+
+/*-------------------- insert --------------------------
+	insert: Inserts one newly allocated term with the coefficient 
+	newCoefficient and power power. Uses "next" as a reference for 
+	where to insert. Once insertion is complete, increments
+	size and exits.
+
+	preconditions:
+		next must not be a null pointer. A term must not already
+		exist with the same power. newCoefficient cannot be 0.
+	postconditions:
+		A new term is inserted in the appropriate spot in the 
+		linked list with newCoefficient and power as its values.
+--------------------------------------------------------------*/
 bool Polynomial::insert(Term* next, const double newCoefficient, const int power)
 {
 	// if there is already a term, do not insert.
@@ -535,6 +726,18 @@ bool Polynomial::insert(Term* next, const double newCoefficient, const int power
 	Returns false if Term points to a null value. Otherwise, assumes pointer
 	is valid.
 */
+
+/*-------------------- remove --------------------------
+	remove: deallocates the specific term that is pointed to by
+	pos.
+
+	preconditions:
+		assumes that pointer shifting has happened outside of
+		its scope. pos must be a valid term that is not the
+		dummy header.
+	postconditions:
+		Deallocates the memory pointed to by pos. 
+--------------------------------------------------------------*/
 bool Polynomial::remove(Term* pos)
 {
 	if (pos == NULL)
@@ -555,6 +758,15 @@ bool Polynomial::remove(Term* pos)
 	return true;
 }
 
+/*-------------------- getSize --------------------------
+	getSize: Debug code to identify discrepancies between 
+	terms printed and terms held in the list.
+
+	preconditions:
+		none
+	postconditions:
+		returns size of list.
+--------------------------------------------------------------*/
 int Polynomial::getSize() const
 {
 	return size;
