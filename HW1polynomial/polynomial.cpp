@@ -473,6 +473,7 @@ void Polynomial::clearTerms()
 		index = index->next; // moves forward 1
 		remove(index->prev); // remove() handles updating "next" and "prev" pointers
 	}
+
 	index = NULL;
 }
 
@@ -481,6 +482,8 @@ Polynomial& Polynomial::operator+=(const Polynomial& p)
 	Polynomial *temp = new Polynomial;
 	*temp = *this + p;
 	*this = *temp;
+	delete temp;
+	temp = NULL;
 	return (*this);
 }
 
@@ -489,6 +492,8 @@ Polynomial& Polynomial::operator-=(const Polynomial& p)
 	Polynomial *temp = new Polynomial;
 	*temp = *this - p;
 	*this = *temp;
+	delete temp;
+	temp = NULL;
 	return (*this);
 }
 

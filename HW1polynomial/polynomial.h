@@ -3,6 +3,7 @@
 #include <iomanip>
 #include <sstream>
 #include <string>
+#include <cmath>
 using namespace std;
 
 class Polynomial {
